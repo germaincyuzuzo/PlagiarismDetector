@@ -30,6 +30,8 @@ plagiarism_detector/
 ├── essay2.txt # Second essay (input file)
 └── README.md # Documentation
 
+---
+
 Setup Instructions
 
 1. Clone the repository or download the files:
@@ -47,26 +49,36 @@ Run the program:
 
 python detector.py
 
+---
+
 Example Usage
 After running the script, you'll see:
 
+
 Plagiarism Percentage: 56.78%
 Potential Plagiarism Detected!
+
 
 Common Words:
 the - Essay1: 20, Essay2: 15
 education - Essay1: 3, Essay2: 4
 ...
 
+
 Enter a word to search (or 'exit' to quit):
 education
 'education' - Essay1: 3, Essay2: 4
 
+---
+
 How Plagiarism Is Calculated
 The plagiarism percentage is calculated using the formula:
 
+
 plagiarism % = (number of common words / total unique words) × 100
 If plagiarism % ≥ 50%, the program reports potential plagiarism.
+
+---
 
 Input Validation & Error Handling
 
