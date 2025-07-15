@@ -1,7 +1,7 @@
 import re
 from collections import Counter
 
-# === Load and clean text ===
+# Function to load and clean text 
 def load_text(filename):
     try:
         with open(filename, 'r', encoding='utf-8') as file:
@@ -16,11 +16,11 @@ def clean_text(text):
     words = text.split()
     return words
 
-# === Generate word frequency counters ===
+# Function to generate word frequency counters 
 def get_word_counter(words):
     return Counter(words)
 
-# === Get common words ===
+# Function to get common words 
 def get_common_words(counter1, counter2):
     common = set(counter1) & set(counter2)
     result = []
@@ -28,17 +28,17 @@ def get_common_words(counter1, counter2):
         result.append((word, counter1[word], counter2[word]))
     return result
 
-# === Search function that returns True/False ===
+# Function to search function that returns True/False 
 def search_word_exists(word, counter1, counter2):
     word = word.lower().strip()
     return word in counter1 or word in counter2
 
-# === Return frequency counts if needed ===
+# Function to return frequency counts if needed 
 def search_word_counts(word, counter1, counter2):
     word = word.lower().strip()
     return counter1.get(word, 0), counter2.get(word, 0)
 
-# === Calculate plagiarism percentage ===
+# Function to calculate plagiarism percentage 
 def calculate_plagiarism_percentage(counter1, counter2):
     set1 = set(counter1)
     set2 = set(counter2)
@@ -48,7 +48,7 @@ def calculate_plagiarism_percentage(counter1, counter2):
         return 0.0
     return (len(intersection) / len(union)) * 100
 
-# === Main Program ===
+# Function to run the main Program 
 def main():
     # Load and preprocess essays
     essay1 = clean_text(load_text('essay1.txt'))
