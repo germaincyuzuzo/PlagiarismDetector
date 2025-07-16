@@ -1,44 +1,62 @@
 import re
 from collections import Counter
+import PyPDF2
+import os
+from tabulate import tabulate  # pip install tabulate
 
-# Function to load and clean text 
+
+# === Load and clean text ===
 def load_text(filename):
-    try:
-        with open(filename, 'r', encoding='utf-8') as file:
-            return file.read()
-    except FileNotFoundError:
-        print(f"File {filename} not found.")
+    if filename.endswith('.txt'):
+        try:
+            with open(filename, 'r', encoding='utf-8') as file:
+                return file.read()
+        except FileNotFoundError:
+            print(f"File {filename} not found.")
+            return ""
+    elif filename.endswith('.pdf'):
+        try:
+            with open(filename, 'rb') as file:
+                reader = PyPDF2.PdfReader(file)
+                text = ""
+                for page in reader.pages:
+                    page_text = page.extract_text()
+                    if page_text:
+                        text += page_text + "\n"
+                return text
+        except Exception as e:
+            print(f"Error reading {filename}: {e}")
+            return ""
+    else:
+        print(f"Unsupported file type: {filename}")
         return ""
+
 
 def clean_text(text):
     text = text.lower()
     text = re.sub(r'[^a-z\s]', '', text)
-    words = text.split()
-    return words
+    return text.split()
 
-# Function to generate word frequency counters 
+
 def get_word_counter(words):
     return Counter(words)
 
-# Function to get common words 
+
 def get_common_words(counter1, counter2):
     common = set(counter1) & set(counter2)
-    result = []
-    for word in common:
-        result.append((word, counter1[word], counter2[word]))
-    return result
+    return [(word, counter1[word], counter2[word]) for word in sorted(common)]
 
-# Function to search function that returns True/False 
+
 def search_word_exists(word, counter1, counter2):
     word = word.lower().strip()
     return word in counter1 or word in counter2
 
-# Function to return frequency counts if needed 
+
 def search_word_counts(word, counter1, counter2):
     word = word.lower().strip()
     return counter1.get(word, 0), counter2.get(word, 0)
 
-# Function to calculate plagiarism percentage 
+
 def calculate_plagiarism_percentage(counter1, counter2):
     set1 = set(counter1)
     set2 = set(counter2)
@@ -48,51 +66,58 @@ def calculate_plagiarism_percentage(counter1, counter2):
         return 0.0
     return (len(intersection) / len(union)) * 100
 
-# Function to run the main Program 
-def main():
-    # Load and preprocess essays
-    essay1 = clean_text(load_text('essay1.txt'))
-    essay2 = clean_text(load_text('essay2.txt'))
 
-    if not essay1 or not essay2:
-        print("One or both essays are empty or missing.")
+def display_common_words_table(common_words):
+    headers = ["Word", "Essay 1 Count", "Essay 2 Count"]
+    print("\n--- Common Words ---")
+    print(tabulate(common_words, headers=headers, tablefmt="grid"))
+
+
+def main():
+    essay1_path = input("Enter the path to Essay 1 (.txt or .pdf): ").strip()
+    essay2_path = input("Enter the path to Essay 2 (.txt or .pdf): ").strip()
+
+    text1 = clean_text(load_text(essay1_path))
+    text2 = clean_text(load_text(essay2_path))
+
+    if not text1 or not text2:
+        print("One or both essays are empty or could not be read.")
         return
 
-    counter1 = get_word_counter(essay1)
-    counter2 = get_word_counter(essay2)
+    counter1 = get_word_counter(text1)
+    counter2 = get_word_counter(text2)
 
-    # Calculate and display plagiarism percentage
-    percentage = calculate_plagiarism_percentage(counter1, counter2)
-    print(f"\nPlagiarism Percentage: {percentage:.2f}%")
-    if percentage >= 50:
+    plagiarism = calculate_plagiarism_percentage(counter1, counter2)
+    print(f"\n Plagiarism Percentage: {plagiarism:.2f}%")
+    if plagiarism >= 50:
         print("Potential Plagiarism Detected!")
     else:
         print("No Plagiarism Detected.")
 
-    # Display common words and their counts
-    print("\nCommon Words:")
+    # Display common words
     common_words = get_common_words(counter1, counter2)
-    if not common_words:
-        print("No common words found.")
+    if common_words:
+        display_common_words_table(common_words)
     else:
-        for word, count1, count2 in common_words:
-            print(f"{word} - Essay1: {count1}, Essay2: {count2}")
+        print("\nNo common words found.")
 
-    # Word search loop with input validation
+    # Word search loop
     while True:
-        search = input("\nEnter a word to search (or 'exit' to quit): ").strip()
-        if not search:
+        word = input("\n Enter a word to search (or 'exit' to quit): ").strip()
+        if word.lower() == 'exit':
+            print("Exiting program...")
+            break
+        elif not word:
             print("Please enter a non-empty word.")
             continue
-        if search.lower() == 'exit':
-            break
 
-        exists = search_word_exists(search, counter1, counter2)
-        if not exists:
-            print(f"The word '{search}' was not found in either essay.")
+        if search_word_exists(word, counter1, counter2):
+            c1, c2 = search_word_counts(word, counter1, counter2)
+            print(tabulate([[word, c1, c2]],
+                           headers=["Word", "Essay 1", "Essay 2"],
+                           tablefmt="fancy_grid"))
         else:
-            count1, count2 = search_word_counts(search, counter1, counter2)
-            print(f"'{search}' - Essay1: {count1}, Essay2: {count2}")
+            print(f"'{word}' was not found in either essay.")
 
 if __name__ == "__main__":
     main()
