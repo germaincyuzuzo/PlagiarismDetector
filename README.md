@@ -18,7 +18,7 @@ Input validation and error handling for file and user input
 Tech Stack
 
 Python 3: Main programming language 
-Standard Library Modules: re, collections.Counter, os
+Standard Library Modules: re, collections.Counter, os, tabulate, PyPDF2
 
 ---
 
