@@ -2,10 +2,10 @@ import re
 from collections import Counter
 import PyPDF2
 import os
-from tabulate import tabulate  # pip install tabulate
+from tabulate import tabulate 
 
 
-# === Load and clean text ===
+# Load the content of a text or PDF file
 def load_text(filename):
     if filename.endswith('.txt'):
         try:
@@ -32,31 +32,37 @@ def load_text(filename):
         return ""
 
 
+# Convert text to lowercase, remove non-letter characters, and split into words
 def clean_text(text):
     text = text.lower()
     text = re.sub(r'[^a-z\s]', '', text)
     return text.split()
 
 
+# Count occurrences of each word in a list
 def get_word_counter(words):
     return Counter(words)
 
 
+# Find words common to both essays and return their counts in each
 def get_common_words(counter1, counter2):
     common = set(counter1) & set(counter2)
     return [(word, counter1[word], counter2[word]) for word in sorted(common)]
 
 
+# Check if a word exists in either of the two essays
 def search_word_exists(word, counter1, counter2):
     word = word.lower().strip()
     return word in counter1 or word in counter2
 
 
+# Return the number of times a word appears in both essays
 def search_word_counts(word, counter1, counter2):
     word = word.lower().strip()
     return counter1.get(word, 0), counter2.get(word, 0)
 
 
+# Calculate the plagiarism percentage based on word overlap
 def calculate_plagiarism_percentage(counter1, counter2):
     set1 = set(counter1)
     set2 = set(counter2)
@@ -67,6 +73,7 @@ def calculate_plagiarism_percentage(counter1, counter2):
     return (len(intersection) / len(union)) * 100
 
 
+# Print a formatted table of common words and their counts
 def display_common_words_table(common_words):
     headers = ["Word", "Essay 1 Count", "Essay 2 Count"]
     print("\n--- Common Words ---")
